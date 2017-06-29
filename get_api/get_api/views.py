@@ -33,14 +33,17 @@ class TestAPI(viewsets.ViewSet):
         kernel = dill.loads(base64.b64decode(req_cache.user.aiml_kernel))
         if question["messageSource"] == "messengerUser":
             question = generate_reply(question, kernel, req_cache.cache)
-        
+        else:
+            question = create_response(question, kernel, req_cache.cache)
         if 'entities' in question:
             req_cache.cache = question['entities']
             req_cache.user.aiml_kernel = \
                 base64.b64encode(dill.dumps(kernel))
             req_cache.user.save()
             req_cache.save()
+
         date_time = str(datetime.now())
         write_to_db(user_input, question['messageText'], date_time, CACHE_ID)
+        #question.pop("entities", None)
         return Response(question)
         

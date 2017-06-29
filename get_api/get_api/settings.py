@@ -25,7 +25,7 @@ SECRET_KEY = '%hpwq35(xq^n#lzn3d@#fmg9*!z=)6*@es_n_-&b@)n=h(-l-u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1','192.168.0.158','chatbot.kreara.net']
 
 
 # Application definition
@@ -121,3 +121,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CORS_ORIGIN_ALLOW_ALL = False
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:8000',
+    }
+}
+
+SESSION_SAVE_EVERY_REQUEST = True
