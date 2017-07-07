@@ -9,10 +9,10 @@ Created on Apr 24, 2017
 # firearm. What is your interest?'], ['Welcome to Gunbro. May I help you find a firearm \
 # or an accessory today?']]
 
-welcome_note = [['Hi, I am Joe, a Chatbot, I can make a \
-recommendation if you tell me how you plan to use the \
-firearm, or provide a specific use such as hunting \
-or personal protection or target shooting for example']]
+welcome_note = [['Hi, I am Joe, a Chatbot. I can make product \
+recommendations. Tell me how you plan to use the \
+firearm, or provide a specific use. Here are some examples customers \
+look for:']]
 
 
 
@@ -23,7 +23,11 @@ prepper_objects = ['Defense', 'Survival']
 
 personal_protection_text = ['Do you prefer a gun for concealed carry or for use \
 in the home where small size and light weight are not as important?']
-# personal_protection_text2 = ['Or do you want to use it while travelling']
+personal_protection_objects = ['Concealed Carry', 'Home', 'Vehicle', '\
+Women, Teens, Persons of Small Stature, Limited Strength']
+
+reply_something_else = ['OK, please tell me in your own words \
+what you want to use firearm for']
 
 
 collector_text = ['Oh you are a gun collector']
@@ -37,7 +41,7 @@ hunter_text3 = ['For example, are you going hunting for \
 rabbit/squirrel/gamebirds/waterfowl/ducks/deer/hogs/elk/antelope/dove/bear/etc?']
 
 objects = ["Which one do you prefer? Paper targets or metallic targets, round ring targets, clay targets or bowling pins ?"]
-target_lists = ['metallic targets', 'round ring targets', 'clay targets' , 'bowling pins']
+target_lists = ['Paper targets', 'Metallic targets', 'Skeet' ,'Trap', 'Sporting clays' , 'Bowling pins', 'Bullseye']
 
 first_end_note = ['Results shown are best suited for']
 end_note = ['Please look at the search results I could gather ']
@@ -66,6 +70,9 @@ military_objects = ['Close contact (<100 yards)', 'Distant Contact (>100 yards)'
 sporting_arms = ['We have a good collection of sporing arms which inludes AK style guns, AR style guns and other sporting rifles.']
 sporting_arms2 = ['Which category you would preffer?']
 sporting_objects = ['AK Style', 'AR Style', 'Other Sporting Rifles']
+
+top_level_persona = ['Personal protection', 'Shooter', 'Hunter', 'Prepper',
+                     'LEO/Military/Tactical', 'Collectors', 'Mordern Sporting Arms', 'Something else']
 
 second_level_text = ['I can again narrow down the recommendation further, Do you want to proceed?']
 

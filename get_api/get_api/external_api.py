@@ -190,6 +190,7 @@ def personal_protection(ent_dict, dict_input, out_dict, db):
     if ent_dict['purpose'] == 'Personal Protection' and ent_dict['perosnal_protection_sub'] == '':
         out_dict['messageText'] = []
         out_dict['messageText'].append(personal_protection_text)
+        out_dict["plugin"] = {'name': 'autofill', 'type': 'items', 'data': personal_protection_objects}
     elif ent_dict['perosnal_protection_sub'] != '':
         out_dict['messageText'] = []
         ent_dict['purpose'] = 'Personal Protection'
@@ -276,6 +277,19 @@ def check_for_hunter(ent_dict, dict_input, out_dict, db):
             out_dict['messageText'].append(no_recommendation)
     return out_dict
 
+
+def identify_entities(out_dict):
+    Manufacturer = out_dict['Manufacturer']
+    Series = out_dict['series']
+    GeneralUse = out_dict['purpose']
+    out_dict.pop('Manufacturer', None)
+    out_dict.pop('series', None)
+    out_dict.pop('purpose', None)
+    
+
+    
+    
+    
 def call_api(dict_input):
     db = connect_to_db()
     out_dict = {}
@@ -285,7 +299,7 @@ def call_api(dict_input):
     ai = apiai.ApiAI(CLIENT_ACCESS_TOKEN)
     request = ai.text_request()
     request.lang = 'de'
-    request.resetContexts = True
+    #request.resetContexts = True
     request.session_id = dict_input['user_id']
     request.query = dict_input['messageText']
     response = yaml.load(request.getresponse())
@@ -294,7 +308,12 @@ def call_api(dict_input):
     out_dict['entities'].append(response['result']['parameters'])
     ent_dict = out_dict['entities'][0]
     print ent_dict
-    if ent_dict.has_key('purpose') and response['result']['action'] !='negative':
+    if response['result']['action'] == 'yes/no':
+        print 'returned', response['result']['parameters']
+        identify_entities(out_dict)
+        #out_dict = identify_entities(ent_dict)
+        
+    if ent_dict.has_key('purpose') and response['result']['action'] !='negative' and response['result']['action'] !='yes/no':
         out_dict = check_for_shooter(ent_dict, dict_input, out_dict, db)
         out_dict = check_for_hunter(ent_dict, dict_input, out_dict, db)
         out_dict = check_for_prepper(ent_dict, dict_input, out_dict, db)
@@ -302,6 +321,7 @@ def call_api(dict_input):
         out_dict = personal_protection(ent_dict, dict_input, out_dict, db)
         out_dict = collector(ent_dict, dict_input, out_dict, db)
         out_dict = sporting(ent_dict, dict_input, out_dict, db)
+    print 'as',out_dict
     return out_dict
 
 

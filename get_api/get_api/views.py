@@ -28,13 +28,17 @@ class TestAPI(viewsets.ViewSet):
         if question['messageSource'] == 'userInitiatedReset':
             req_cache.delete()
             question['messageSource'] = 'messageFromBot'
-            question['messageText'] = random.choice(welcome_note)
+            question['messageText'] = welcome_note
+            question["plugin"] = {'name': 'autofill', 'type': 'items', 'data': top_level_persona}
             return Response(question)
+        if 'Something else' in question['messageText']:
+            question['messageSource'] = 'messageFromBot'
+            question['messageText'] = reply_something_else
+            return Response(question)
+            
         kernel = dill.loads(base64.b64decode(req_cache.user.aiml_kernel))
-        if question["messageSource"] == "messengerUser":
-            question = generate_reply(question, kernel, req_cache.cache)
-        else:
-            question = create_response(question, kernel, req_cache.cache)
+        question = generate_reply(question, kernel, req_cache.cache)
+        print question
         if 'entities' in question:
             req_cache.cache = question['entities']
             req_cache.user.aiml_kernel = \
