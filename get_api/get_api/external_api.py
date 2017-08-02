@@ -10,7 +10,7 @@ import yaml
 from config import *
 import pandas as pd
 import MySQLdb
-
+from fetch_msrp import get_msrp
 
 try:
     import apiai
@@ -39,9 +39,9 @@ def db_query(out_dict, db, search_string):
     best_use = out_dict[search_string]
     specific_use = out_dict['third_level_persona_hunter']
     parent_category = out_dict['guns_category']
-    query_first_part = 'select Model, CapacityStandard, Caliber, BarrelLength, \
-Manufacturer, MSRP, Series, TotalLength, GeneralUse, BestUse,SpecificUse, ParentCategory, \
-Image1 from gun_bro.MDL_API_DATA where '
+    query_first_part = 'select Model, MfgPartNumber, Caliber, BarrelLength, \
+Manufacturer, MSRP, Category, Series, BestUse, ParentCategory, \
+Image1 from gun_bro.MDL_API_DATA_SUBSET_NEW where '
     if parent_category != '':
         query_first_part = query_first_part + "ParentCategory = '%s' and" % (parent_category)
     if general_use != '':
@@ -52,10 +52,13 @@ Image1 from gun_bro.MDL_API_DATA where '
         query_first_part = query_first_part + " SpecificUse = '%s'" % (specific_use)
     if query_first_part.endswith('and'):
         query_first_part = query_first_part.rsplit(' ',1)[0]
-    print query_first_part
+    #query_first_part = query_first_part +' group by MfgPartNumber order by LifeTimeNumberSold desc'
+    #print query_first_part
     try:
         df_type = pd.read_sql(query_first_part, db)
+        #results = get_msrp(df_type)
         results = df_type.to_dict(orient='records')
+        #print results
     except Exception as e:
         print e
     return results, query_first_part
@@ -75,21 +78,22 @@ def db_query_shooter(ent_dict, db):
             return [], 'invalid'
         user_sub_types_list = user_sub_types.split(', ')
     string_query = ''
-    query_first_part = "select Model, CapacityStandard, Manufacturer, Caliber, \
-BarrelLength, MSRP, Series, TotalLength, GeneralUse, ParentCategory, \
-SpecificUse, BestUse, Image1 from gun_bro.MDL_API_DATA where "
+    query_first_part = 'select Model, MfgPartNumber, Caliber, BarrelLength, \
+Manufacturer, MSRP, Series, Category, BestUse, ParentCategory, \
+Image1 from gun_bro.MDL_API_DATA_SUBSET_NEW where '
     if parent_category != '':
         query_first_part = query_first_part + "ParentCategory = '%s' and" % (parent_category)
     if general_use != '':
         query_first_part = query_first_part + " GeneralUse = '%s' and" % (general_use)
     if specific_use != '':
         query_first_part = query_first_part + " SpecificUse = '%s' and" % (specific_use)
-    print user_sub_types_list
     if len(user_sub_types_list) == 0:
         query_first_part = query_first_part.rsplit(' ',1)[0]
-        print query_first_part
+        print 'first part', query_first_part
         try:
+            #query_first_part = query_first_part +' group by MfgPartNumber order by LifeTimeNumberSold desc'
             df_type = pd.read_sql(query_first_part, db)
+            #results = get_msrp(df_type)
             results = df_type.to_dict(orient='records')
             return results, query_first_part
         except Exception as e:
@@ -97,25 +101,25 @@ SpecificUse, BestUse, Image1 from gun_bro.MDL_API_DATA where "
     elif len(user_sub_types_list) >= 2:
         query = query_first_part + " BestUSe = '%s'"%(user_sub_types_list[0])
         user_sub_types_list = user_sub_types_list[1::]
-        print 'user', user_sub_types_list
         string_query = ''.join([string_query+" or BestUse='%s' "%(i) for i in user_sub_types_list])
+        print 'query is ', query
         query = query + string_query
-        print 'quesy', query
+        #query = query +' group by MfgPartNumber order by LifeTimeNumberSold desc'
     else:
         string_query = user_sub_types_list[0]
         query = query_first_part + " BestUse = '%s'"%(string_query)
-        print 'final', query
+        #query = query +' group by MfgPartNumber order by LifeTimeNumberSold desc'
+        #print 'final', query
     try:
         df_type = pd.read_sql(query, db)
+        #results = get_msrp(df_type)
         results = df_type.to_dict(orient='records')
         return results, query
     except Exception as e:
         print e
 
 
-
 def check_for_shooter(ent_dict, dict_input, out_dict, db):
-    print 'dict', ent_dict
     if ent_dict['purpose'] == 'shooter' and ent_dict['targets_shooter'] == '' and ent_dict['third_level_persona_shooter'] == '':
         out_dict['messageText'] = []
         out_dict['messageText'].append(type_of_shooting)
@@ -198,12 +202,9 @@ def personal_protection(ent_dict, dict_input, out_dict, db):
         search_string = 'perosnal_protection_sub'
         results, query = db_query(ent_dict, db, search_string)
         if len(results) != 0 :
-            out_dict['messageText'].append([first_end_note[0] +' '+ent_dict['purpose']])
+            out_dict['messageText'].append([first_end_note[0] +' '+ent_dict['perosnal_protection_sub'] + ' category'])
             out_dict['messageText'].append(end_note)
-            out_dict['messageText'].append(second_level_text)
             out_dict['ResultBuyer'] = results
-            out_dict['messageSource'] = 'secondLevel'
-            out_dict['entities'][0].update({'query':query})
         else:
             out_dict['messageText'].append(no_recommendation)
     return out_dict
@@ -224,10 +225,7 @@ def collector(ent_dict, dict_input, out_dict, db):
         results, query = db_query(ent_dict, db, search_string)
         if len(results) != 0 :
             out_dict['messageText'].append(end_note[0] + ' for '+ ent_dict['collector_sub'])
-            out_dict['messageText'].append(second_level_text)
             out_dict['ResultBuyer'] = results
-            out_dict['messageSource'] = 'secondLevel'
-            out_dict['entities'][0].update({'query':query})
         else:
             out_dict['messageText'].append(no_recommendation)
     return out_dict
@@ -246,10 +244,7 @@ def sporting(ent_dict, dict_input, out_dict, db):
         results, query = db_query(ent_dict, db, search_string)
         if len(results) != 0 :
             out_dict['messageText'].append(end_note[0] + ' for '+ ent_dict['sporting_arms_sub'])
-            out_dict['messageText'].append(second_level_text)
             out_dict['ResultBuyer'] = results
-            out_dict['messageSource'] = 'secondLevel'
-            out_dict['entities'][0].update({'query':query})
         else:
             out_dict['messageText'].append(no_recommendation)
     return out_dict
@@ -271,25 +266,63 @@ def check_for_hunter(ent_dict, dict_input, out_dict, db):
             out_dict['messageText'].append(end_note[0] + ' for '+ ent_dict['purpose'] +' category')
             #out_dict['messageText'].append(second_level_text)
             out_dict['ResultBuyer'] = results
-            out_dict['entities'][0].update({'query':query})
+            #out_dict['entities'][0].update({'query':query})
             #out_dict['messageSource'] = 'secondLevel'
         else:
             out_dict['messageText'].append(no_recommendation)
     return out_dict
 
 
-def identify_entities(out_dict):
-    Manufacturer = out_dict['Manufacturer']
-    Series = out_dict['series']
-    GeneralUse = out_dict['purpose']
-    out_dict.pop('Manufacturer', None)
-    out_dict.pop('series', None)
-    out_dict.pop('purpose', None)
-    
+def identify_entities(out_dict, db):
+    ent_dict = out_dict['entities'][0]
+    if 'Manufacturer' in ent_dict:
+        #print 'Manufacture is there'
+        Manufacturer = ent_dict['Manufacturer']
+        out_dict.pop('Manufacturer', None)
+    else:
+        Manufacturer = ''
+        return out_dict
+    if 'series' in ent_dict:
+        #print 'series is there'
+        Series = ent_dict['series']
+        out_dict.pop('series', None)
+    else:
+        Series = ''
+        return out_dict
+    if 'purpose'in ent_dict:
+        #print 'series is there'
+        GeneralUse = ent_dict['purpose']
+        out_dict.pop('purpose', None)
+    else:
+        GeneralUse =''
+    for element in second_category:
+        if element in ent_dict:
+            BestUse = ent_dict[element]
+        else:
+            BestUse =''
+    query_first_part = 'select Model, Image1 from gun_bro.MDL_API_DATA where '
+    #print query_first_part
+    if Manufacturer != '':
+        query_first_part = query_first_part + "Manufacturer = '%s' and" % (Manufacturer)
+    if Series != '':
+        query_first_part = query_first_part + " Series = '%s' and" % (Series)
+    if BestUse != '':
+        query_first_part = query_first_part + " BestUse = '%s' and" % (BestUse)
+    if query_first_part.endswith('and'):
+        query_first_part = query_first_part.rsplit(' ',1)[0]
+    print query_first_part
+    try:
+        df_type = pd.read_sql(query_first_part, db)
+        results = df_type.to_dict(orient='records')
+        if len(results) != 0:
+            out_dict['messageText'] = ['yes you can, Its a nice choice']
+            return out_dict
+        else:
+            out_dict['messageText'] = ["No, you can't, not"]
+            return out_dict
+    except Exception as e:
+        print e
 
-    
-    
-    
 def call_api(dict_input):
     db = connect_to_db()
     out_dict = {}
@@ -299,20 +332,18 @@ def call_api(dict_input):
     ai = apiai.ApiAI(CLIENT_ACCESS_TOKEN)
     request = ai.text_request()
     request.lang = 'de'
-    #request.resetContexts = True
+    request.resetContexts = True
     request.session_id = dict_input['user_id']
     request.query = dict_input['messageText']
     response = yaml.load(request.getresponse())
-    print 'response', response
+    #print 'response', response
     out_dict['messageText'].append(response['result']['fulfillment']['speech'])
     out_dict['entities'].append(response['result']['parameters'])
     ent_dict = out_dict['entities'][0]
-    print ent_dict
+    #print ent_dict
     if response['result']['action'] == 'yes/no':
-        print 'returned', response['result']['parameters']
-        identify_entities(out_dict)
-        #out_dict = identify_entities(ent_dict)
-        
+        #print 'returned', response['result']['parameters']
+        out_dict = identify_entities(out_dict, db)
     if ent_dict.has_key('purpose') and response['result']['action'] !='negative' and response['result']['action'] !='yes/no':
         out_dict = check_for_shooter(ent_dict, dict_input, out_dict, db)
         out_dict = check_for_hunter(ent_dict, dict_input, out_dict, db)
@@ -321,7 +352,6 @@ def call_api(dict_input):
         out_dict = personal_protection(ent_dict, dict_input, out_dict, db)
         out_dict = collector(ent_dict, dict_input, out_dict, db)
         out_dict = sporting(ent_dict, dict_input, out_dict, db)
-    print 'as',out_dict
     return out_dict
 
 

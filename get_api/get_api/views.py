@@ -4,12 +4,12 @@ Created on Mar 31, 2017
 @author: aneesh.c
 '''
 from rest_framework import viewsets
-from config import *
+from get_api.config import *
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes
 from datetime import datetime
 from rest_framework import permissions
-from model import *
+from get_api.model import *
 import random
 import dill
 import base64
@@ -22,7 +22,7 @@ class TestAPI(viewsets.ViewSet):
         CACHE_ID = 'Constant45l54'
         if 'user_id' in question:
             CACHE_ID = question['user_id']
-        print 'question', question
+        #print 'question', question
         req_cache = create_cache(CACHE_ID)
         user_input = question['messageText']
         if question['messageSource'] == 'userInitiatedReset':
@@ -38,7 +38,7 @@ class TestAPI(viewsets.ViewSet):
             
         kernel = dill.loads(base64.b64decode(req_cache.user.aiml_kernel))
         question = generate_reply(question, kernel, req_cache.cache)
-        print question
+        #print question
         if 'entities' in question:
             req_cache.cache = question['entities']
             req_cache.user.aiml_kernel = \

@@ -9,10 +9,8 @@ Created on Apr 24, 2017
 # firearm. What is your interest?'], ['Welcome to Gunbro. May I help you find a firearm \
 # or an accessory today?']]
 
-welcome_note = [['Hi, I am Joe, a Chatbot. I can make product \
-recommendations. Tell me how you plan to use the \
-firearm, or provide a specific use. Here are some examples customers \
-look for:']]
+welcome_note = [['Hi, I am Joe, a Chatbot. I can make product recommendations. \
+Tell me how you plan to use your firearm, or click on one of the examples below:']]
 
 
 
@@ -71,8 +69,7 @@ sporting_arms = ['We have a good collection of sporing arms which inludes AK sty
 sporting_arms2 = ['Which category you would preffer?']
 sporting_objects = ['AK Style', 'AR Style', 'Other Sporting Rifles']
 
-top_level_persona = ['Personal protection', 'Shooter', 'Hunter', 'Prepper',
-                     'LEO/Military/Tactical', 'Collectors', 'Mordern Sporting Arms', 'Something else']
+top_level_persona = ['Personal protection', 'Recreational Shooting', 'Hunting', 'Something else']
 
 second_level_text = ['I can again narrow down the recommendation further, Do you want to proceed?']
 
@@ -94,3 +91,8 @@ Daniel Defense', 'Hi Point Firearms', 'DPMS', 'Ruger', 'Walther', '\
 Austrian Sporting Arms', 'Sako', 'Mossberg', 'Magnum Research', '\
 Benelli', 'Century', 'Heritage Arms', 'Colt', 'Romarm/Cugir', '\
 Remington', 'Charter Arms', 'Canik', 'Bushmaster', 'CZ-USA']
+
+second_category = ['target_hunter', 'perosnal_protection_sub', '\
+sporting_arms_sub', 'target_military', 'target_prepper', '\
+targets_shooter', 'third_level_persona_hunter', '\
+third_level_persona_shooter']

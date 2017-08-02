@@ -17,7 +17,7 @@ from external_api import connect_to_db
 import pandas as pd
 from config import end_note
 from config import no_recommendation
-brain_file_medical = "C:\Users\\aneesh.c\workspace\get_api\get_api\gunbroker_modified_v2.brn"
+brain_file_medical = "C:\\Users\\aneesh.c\workspace\get_api\get_api\gunbroker_modified_v2.brn"
 
 
 
@@ -43,8 +43,8 @@ user_id) VALUES ('%s','%s', '%s', '%s')""" % (
         cursor.execute(sql)
         db.commit()
     except Exception as e:
-        print e
-        print 'Db is not getting connected'
+        print (e)
+        print ('Db is not getting connected')
         pass
 
 
@@ -68,7 +68,7 @@ def generate_reply(question, kernel, cache_list):
     #question['messageSource'] = 'messageFromBot'
     response = question
     kernel_reply = kernel.respond(str(question['messageText']))
-    print 'kernel ores',kernel_reply
+    print ('kernel ores', kernel_reply)
     if "Sorry, I didn't get you.." in kernel_reply or 'See you later' in kernel_reply:
         response = call_api(response)
         return response
@@ -78,60 +78,58 @@ def generate_reply(question, kernel, cache_list):
         response['messageText'].append(kernel_reply)
         return response
 
-def text_classify(response):
-    return 1
 
-def extract_manufacturer(response):
-    print response['messageText']
-    string_input = "".join(response['messageText']).lower()
-    print 'st', string_input
-    manufactr = ''
-    manufactr = re.findall(r"(?=("+'|'.join(manufacturers)+r"))", str(string_input))
-    manufactr = ''.join(manufactr)
-    return manufactr
+# def extract_manufacturer(response):
+#     #print response['messageText']
+#     string_input = "".join(response['messageText']).lower()
+#     #print 'st', string_input
+#     manufactr = ''
+#     manufactr = re.findall(r"(?=("+'|'.join(manufacturers)+r"))", str(string_input))
+#     manufactr = ''.join(manufactr)
+#     return manufactr
 
-def create_response(question, kernel, cache_list):
-    response = question
-   
-    response['entities'] = cache_list
-    #print 'final', cache_list
-    label = text_classify(response)
-    if label == 0 and response["messageSource"] != "classified":
-        response['messageText'] = []
-        response['messageText'].append(['OK, See you again'])
-        response["messageSource"] = "messengerUser"
-        return response
-    elif label == 1 and response["messageSource"] != "classified":
-        response['messageText'] = []
-        response['messageText'] = ['Which manufacturer you would prefer?']
-        response["messageSource"] = "classified"
-        return response
-    if response["messageSource"] == "classified":
-        Manufacturer = extract_manufacturer(response)
-        print Manufacturer
-        ent_dict = response['entities'][0]
-        if Manufacturer !='':
-            results = []
-            query = ent_dict['query']
-            query = query.split('where', 1)[0] + "where Manufacturer='%s' and "%(Manufacturer)+ query.split('where', 1)[1]
-            print 'end', query
-            db = connect_to_db()
-            try:
-                table = pd.read_sql("%s"%query,db)
-                results = table.to_dict(orient='records')
-            except Exception as e:
-                print e
-            if len(results) !=0:
-                response['messageText'] = []
-                response['ResultBuyer'] = results
-                response["messageSource"] = "messengerUser"
-                response['messageText'].append(end_note[0])
-            else:
-                response['messageText'] = []
-                response["messageSource"] = "messengerUser"
-                response['messageText'].append(no_recommendation)
-        else:
-            response['messageText'] = []
-            response["messageSource"] = "messengerUser"
-            response['messageText'].append(no_recommendation)
-    return response
+# def create_response(question, kernel, cache_list):
+#     response = question
+#    
+#     response['entities'] = cache_list
+#     #print 'final', cache_list
+#     label = text_classify(response)
+#     if label == 0 and response["messageSource"] != "classified":
+#         response['messageText'] = []
+#         response['messageText'].append(['OK, See you again'])
+#         response["messageSource"] = "messengerUser"
+#         return response
+#     elif label == 1 and response["messageSource"] != "classified":
+#         response['messageText'] = []
+#         response['messageText'] = ['Which manufacturer you would prefer?']
+#         response["messageSource"] = "classified"
+#         return response
+#     if response["messageSource"] == "classified":
+#         Manufacturer = extract_manufacturer(response)
+#         print (Manufacturer)
+#         ent_dict = response['entities'][0]
+#         if Manufacturer !='':
+#             results = []
+#             query = ent_dict['query']
+#             query = query.split('where', 1)[0] + "where Manufacturer='%s' and "%(Manufacturer)+ query.split('where', 1)[1]
+#             print ('end', query)
+#             db = connect_to_db()
+#             try:
+#                 table = pd.read_sql("%s"%query,db)
+#                 results = table.to_dict(orient='records')
+#             except Exception as e:
+#                 print (e)
+#             if len(results) !=0:
+#                 response['messageText'] = []
+#                 response['ResultBuyer'] = results
+#                 response["messageSource"] = "messengerUser"
+#                 response['messageText'].append(end_note[0])
+#             else:
+#                 response['messageText'] = []
+#                 response["messageSource"] = "messengerUser"
+#                 response['messageText'].append(no_recommendation)
+#         else:
+#             response['messageText'] = []
+#             response["messageSource"] = "messengerUser"
+#             response['messageText'].append(no_recommendation)
+#     return response
